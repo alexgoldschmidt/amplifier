@@ -1,4 +1,9 @@
 ---
+extends: foundation
+
+includes:
+  - bundle: azure-devops:behaviors/azure-devops-extras
+
 bundle:
   name: ado-research
   version: 1.0.0
@@ -12,11 +17,6 @@ bundle:
     - Azure CLI with devops extension: az extension add --name azure-devops
     - Authenticated: az login
     - Config file: .amplifier/ado-research-config.yaml
-
-  extends: foundation
-
-  includes:
-    - bundle: azure-devops:behaviors/azure-devops-extras
 
 agents:
   include:
