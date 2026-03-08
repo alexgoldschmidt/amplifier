@@ -1,0 +1,5 @@
+# ADO Event Monitor - Amplifier Settings
+# Valid keys: providers, modules.tools, config
+
+# No custom settings needed - using defaults from bundle.md
+# This file exists for future overrides (API keys, tool configs, etc.)

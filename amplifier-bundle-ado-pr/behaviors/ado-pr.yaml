@@ -1,0 +1,17 @@
+bundle:
+  name: behavior-ado-pr
+  version: 1.0.0
+  description: |
+    PR lifecycle management agent and context.
+    Composes with ado-work-items for work item linking.
+
+extends:
+  - ado-work-items:behaviors/ado-work-items
+
+agents:
+  include:
+    - ado-pr:agents/ado-pr-manager
+
+context:
+  include:
+    - ado-pr:context/ado-pr-comments-api.md

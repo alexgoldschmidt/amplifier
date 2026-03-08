@@ -1,0 +1,15 @@
+bundle:
+  name: behavior-azure-devops-extras
+  version: 1.0.0
+  description: |
+    Additional ADO agents not covered by ado-work-items or ado-pr.
+    Pipelines, repos (non-PR), CLI reference.
+
+agents:
+  include:
+    - azure-devops:agents/ado-pipelines
+    - azure-devops:agents/ado-repos
+
+context:
+  include:
+    - azure-devops:context/ado-cli-reference.md

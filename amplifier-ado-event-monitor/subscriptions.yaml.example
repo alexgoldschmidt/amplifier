@@ -1,0 +1,76 @@
+# ADO Event Monitor - Example Configuration
+#
+# Copy this file to subscriptions.yaml and customize for your project.
+#
+# Usage:
+#   ado-monitor --config subscriptions.yaml
+#   ado-monitor --config subscriptions.yaml --pat YOUR_PAT
+#
+# Or set ADO_PAT environment variable for authentication.
+
+# Authors to ignore (prevents infinite loops from our own actions)
+ignore_authors:
+  - "Amplifier Bot"
+  - "amplifier[bot]"
+  - "your-service-principal-name"
+
+subscriptions:
+  # Example: Watch a PR for review feedback
+  - id: pr-123
+    type: pull-request
+    org: myorg
+    project: myproject
+    repo: myrepo
+    pr_id: 123
+    poll_interval: 60s  # Check every minute
+    events:
+      - new-comments
+      - status-change
+      - vote-change
+      - push-update
+    actions:
+      # When new comments appear, have ado-pr-manager address the feedback
+      - agent: ado-pr-manager
+        trigger: new-comments
+        behavior: address-feedback
+      # When new pushes happen, monitor the build
+      - agent: ado-pipelines
+        trigger: push-update
+        behavior: monitor-build
+
+  # Example: Watch a work item for state changes
+  - id: wi-456
+    type: work-item
+    org: myorg
+    project: myproject
+    work_item_id: 456
+    poll_interval: 120s  # Check every 2 minutes
+    events:
+      - state-change
+      - field-update
+      - comment-added
+    actions:
+      # When state changes, sync with related items
+      - agent: ado-work-items
+        trigger: state-change
+        behavior: sync-status
+      # When comments added, notify relevant parties
+      - agent: ado-work-items
+        trigger: comment-added
+        behavior: process-comment
+
+  # Example: Using recipes instead of direct agent invocation (recommended)
+  - id: pr-789
+    type: pull-request
+    org: myorg
+    project: myproject
+    repo: myrepo
+    pr_id: 789
+    poll_interval: 60s
+    events:
+      - new-comments
+    actions:
+      # Recipes provide resumability, approval gates, and audit trails
+      - agent: ado-pr-manager
+        trigger: new-comments
+        recipe: azure-devops:recipes/address-pr-feedback.yaml
