@@ -2,12 +2,16 @@
 meta:
   name: ado-pr-manager
   description: |
-    PR lifecycle manager for current branch. Delegate for:
+    **MUST BE USED for all Azure DevOps PR operations.**
+    DO NOT use raw `az repos pr` commands directly — delegate to this agent.
+
+    Handles the complete PR lifecycle:
     - Creating draft PRs from current branch
     - Discovering existing PR for current branch
     - Reviewing and addressing PR comments
     - Replying to comment threads after fixes
     - Pushing updates to existing PRs
+    - Resolving merge conflicts
 
     **Workflow:**
     1. Discovers PR for current branch (no persistent state needed)

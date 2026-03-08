@@ -2,7 +2,10 @@
 meta:
   name: ado-boards
   description: |
-    Azure DevOps boards and sprint management. Delegate for:
+    **MUST BE USED for Azure DevOps sprint and board operations.**
+    DO NOT use raw `az boards iteration` or capacity commands directly — delegate to this agent.
+
+    Handles boards and sprint management:
     - Sprint planning and capacity
     - Backlog management and prioritization
     - Iteration paths and area paths

@@ -6,9 +6,8 @@ bundle:
     Root bundle for Azure DevOps integration.
     Re-exports the full azure-devops bundle for simpler git references.
 
-extends: foundation
-
 includes:
+  - bundle: foundation
   - bundle: azure-devops:bundle
 
 sources:

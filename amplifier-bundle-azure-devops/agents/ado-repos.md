@@ -2,7 +2,10 @@
 meta:
   name: ado-repos
   description: |
-    Azure DevOps repository operations. Delegate for:
+    **MUST BE USED for Azure DevOps repository operations.**
+    DO NOT use raw `az repos` branch/ref commands directly — delegate to this agent.
+
+    Handles repository operations:
     - Branch management (list, create, delete)
     - Viewing commits and diffs
     - Repository policies

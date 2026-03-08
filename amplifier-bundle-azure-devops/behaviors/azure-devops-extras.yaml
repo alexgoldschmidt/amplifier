@@ -13,3 +13,4 @@ agents:
 context:
   include:
     - azure-devops:context/ado-cli-reference.md
+    - azure-devops:context/ado-routing.md

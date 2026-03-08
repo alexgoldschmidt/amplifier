@@ -2,7 +2,10 @@
 meta:
   name: ado-work-items
   description: |
-    Azure DevOps work item operations. Delegate for:
+    **MUST BE USED for Azure DevOps work item operations.**
+    DO NOT use raw `az boards work-item` commands directly — delegate to this agent.
+
+    Handles all work item operations:
     - Creating/updating work items (Bug, Task, User Story, Feature, Epic)
     - Querying with WIQL
     - Linking work items (parent/child, related, predecessor)

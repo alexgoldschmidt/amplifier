@@ -2,7 +2,10 @@
 meta:
   name: ado-pipelines
   description: |
-    Azure DevOps pipeline operations. Delegate for:
+    **MUST BE USED for Azure DevOps pipeline operations.**
+    DO NOT use raw `az pipelines` commands directly — delegate to this agent.
+
+    Handles all pipeline operations:
     - Triggering pipeline runs
     - Monitoring build/release status
     - Retrieving build logs
