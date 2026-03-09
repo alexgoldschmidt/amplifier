@@ -25,41 +25,69 @@ You help developers prepare standups and track their work.
 
 ## Core Workflows
 
-### Generate Standup
+### Generate Standup (Sprint-Driven Discovery)
 
-1. Query recent commits (last 24h, filtered by user):
-   ```bash
-   az repos commit list --repository {repo} --top 50 --query "[?author.email=='{user_email}']" -o json
-   ```
+**Step 1: Get current sprint iteration path**
+```bash
+az boards iteration team list --team {team} --timeframe current -o json
+```
 
-2. Query PR activity:
-   ```bash
-   az repos pr list --repository {repo} --creator {user_email} --status all --top 20 -o json
-   ```
+**Step 2: Query MY work items in the sprint** (project-scoped)
+```bash
+az boards query --wiql "
+  SELECT [System.Id], [System.Title], [System.State], [System.ChangedDate]
+  FROM WorkItems
+  WHERE [System.IterationPath] = @CurrentIteration
+    AND [System.AssignedTo] = @Me
+  ORDER BY [System.ChangedDate] DESC
+" -o json
+```
 
-3. Query work item changes:
-   ```bash
-   az boards query --wiql "SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.ChangedBy] = @Me AND [System.ChangedDate] >= @Today - 1" -o json
-   ```
+**Step 3: Get linked PRs for each work item**
+```bash
+# For each work item, fetch relations
+az rest --method get \
+  --resource "499b84ac-1321-427f-aa17-267ca6975798" \
+  --uri "https://dev.azure.com/{org}/{project}/_apis/wit/workitems/{id}?$expand=relations&api-version=7.1"
+# Filter relations where rel == "ArtifactLink" and url contains "PullRequest"
+```
 
-4. Read journal entries from `.amplifier/scrum-journal.yaml`
+**Step 4: Get ALL my active PRs across the project** (catch unlinked PRs)
+```bash
+az repos pr list --project {project} --creator {user_email} --status active -o json
+```
 
-5. Check recurring items from `.amplifier/scrum-config.yaml`
+**Step 5: Identify orphan PRs** (active PRs not linked to sprint work items)
+Compare PR list from Step 4 against linked PRs from Step 3. Flag any PRs missing WI links.
 
-6. Format output:
-   ```
-   ## Yesterday (from ADO)
-   - [activity list]
-   
-   ## Yesterday (journal)
-   - [journal entries]
-   
-   ## Today
-   - [planned work + recurring meetings]
-   
-   ## Blockers & Recommended Actions
-   - [blockers with recommendations]
-   ```
+**Step 6: Read journal entries and recurring items**
+- `.amplifier/scrum-journal.yaml`
+- `.amplifier/scrum-config.yaml`
+
+**Step 7: Format output**
+```
+## Sprint Work Items (assigned to me)
+- WI#123: Feature X [In Progress] → PR #456 (linked)
+- WI#124: Bug Y [Code Review] → PR #457 (linked)
+- WI#125: Task Z [Active] → No PR yet
+
+## PRs Without Sprint Work Items ⚠️
+- PR #458: "Quick fix for auth" → NOT LINKED to any sprint WI
+
+## Yesterday (from ADO)
+- Moved WI#123 to In Progress
+- Created PR #456
+
+## Yesterday (journal)
+- [journal entries]
+
+## Today
+- Continue WI#123
+- Platform sync meeting (recurring/tuesday)
+
+## Blockers & Recommended Actions
+- PR #456 waiting 2 days → Ping @reviewer
+```
 
 ### Add Journal Entry
 
