@@ -9,7 +9,7 @@ bundle:
     Includes: PR creation, discovery, comment review, work item linking.
 
 includes:
-  - bundle: amplifier-bundle-ado-work-items/bundle.md
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-work-items
   - bundle: ado-pr:behaviors/ado-pr
 
 tools:
