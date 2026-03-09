@@ -14,20 +14,18 @@ bundle:
     - Azure CLI with devops extension: az extension add --name azure-devops
     - Authenticated: az login
 
-extends: foundation
-
 includes:
+  # Foundation provides core tools (bash, filesystem, etc.)
+  - bundle: foundation
   # Core bundles (ado-pr includes ado-work-items via composition)
   - bundle: ado-pr:bundle
   # Additional agents not in composed bundles
   - bundle: azure-devops:behaviors/azure-devops-extras
   # EngHub documentation research
-  - bundle: ado-research:bundle
+  - bundle: ado-research:behaviors/ado-research
   # Dev machine bundle for autonomous development infrastructure
   - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
 
-tools: []
-# No custom tools — agents use tool-bash inherited from foundation
 ---
 
 # Azure DevOps Bundle
