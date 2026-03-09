@@ -29,6 +29,8 @@ includes:
   - bundle: ado-test:bundle
   # KQL diagnostics
   - bundle: ado-kql:bundle
+  # SWE Agent task management (GitHub Copilot auto-PR creation)
+  - bundle: ado-swe-agents:bundle
   # Dev machine bundle for autonomous development infrastructure
   - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
 
@@ -49,6 +51,7 @@ azure-devops (full suite)
 ├── ado-scrum (standup & journal tracking) ← NEW
 ├── ado-test (test execution & analysis) ← NEW
 ├── ado-kql (KQL diagnostics) ← NEW
+├── ado-swe-agents (GitHub Copilot SWE Agent tasks) ← NEW
 ├── ado-pipelines (pipeline ops)
 ├── ado-repos (repository ops)
 └── ado-boards (sprint management)
@@ -79,6 +82,7 @@ az devops project show
 | `ado-scrum-helper` | Standup generation, journal tracking, blocker detection |
 | `ado-test-runner` | Local tests, pipeline results, failure linking |
 | `ado-kql-analyst` | KQL queries, query library, Geneva diagnostics |
+| `ado-swe-agent` | **REQUIRED** for creating PRs via GitHub Copilot SWE Agent |
 
 ## Lighter Alternatives
 

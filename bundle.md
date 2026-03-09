@@ -8,17 +8,7 @@ bundle:
 
 includes:
   - bundle: foundation
-  - bundle: azure-devops:bundle
-
-sources:
-  azure-devops: ./amplifier-bundle-azure-devops
-  ado-pr: ./amplifier-bundle-ado-pr
-  ado-work-items: ./amplifier-bundle-ado-work-items
-  ado-research: ./amplifier-bundle-ado-research
-  ado-kql: ./amplifier-bundle-ado-kql
-  ado-scrum: ./amplifier-bundle-ado-scrum
-  ado-test: ./amplifier-bundle-ado-test
-  ado-event-monitor: ./amplifier-ado-event-monitor
+  - bundle: ./amplifier-bundle-azure-devops/bundle.md
 ---
 
 # Amplifier Azure DevOps

@@ -1,0 +1,13 @@
+bundle:
+  name: behavior-ado-swe-agents
+  version: 1.0.0
+  description: |
+    SWE Agent task management agents and context.
+
+agents:
+  include:
+    - ado-swe-agents:agents/ado-swe-agent
+
+context:
+  include:
+    - ado-swe-agents:context/swe-agent-protocol.md

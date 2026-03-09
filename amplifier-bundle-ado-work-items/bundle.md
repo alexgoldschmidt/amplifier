@@ -9,9 +9,8 @@ bundle:
     Use independently for project management tasks, or compose with
     ado-pr for full PR + work item workflows.
 
-behaviors:
-  include:
-    - ado-work-items:behaviors/ado-work-items
+includes:
+  - bundle: ado-work-items:behaviors/ado-work-items
 
 tools:
   - module: tool-bash
