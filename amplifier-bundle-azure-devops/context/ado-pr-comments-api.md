@@ -4,7 +4,7 @@ The `az repos` CLI doesn't cover PR comment threads well. Use `az rest` with the
 
 ## Preferred Method: az rest
 
-**Always use `az rest` with `--resource` for Azure DevOps API calls** — curl has HTTP/2 protocol issues with ADO.
+**Always use `az rest` with `--resource` for Azure DevOps API calls** — curl fails in WSL with HTTP 000 errors due to proxy/network quirks. The Azure CLI handles these issues transparently.
 
 ```bash
 # List threads
