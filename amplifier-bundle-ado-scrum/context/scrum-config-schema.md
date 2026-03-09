@@ -5,6 +5,12 @@
 ```yaml
 version: 1
 
+# ADO team context (required for sprint-driven discovery)
+ado:
+  org: msazure                    # Azure DevOps organization (auto-detected from git remote if not set)
+  project: myproject              # Azure DevOps project (auto-detected from git remote if not set)
+  team: "My Team"                 # Team name for sprint/iteration queries (REQUIRED if multiple teams)
+
 # Recurring meetings/events to surface in standup
 recurring:
   - name: "Meeting name"

@@ -27,9 +27,19 @@ You help developers prepare standups and track their work.
 
 ### Generate Standup (Sprint-Driven Discovery)
 
+**Step 0: Bootstrap ADO context**
+1. Read `.amplifier/scrum-config.yaml` for explicit `ado.org`, `ado.project`, `ado.team`
+2. If not set, auto-detect org/project from git remote URL:
+   ```bash
+   git remote get-url origin | grep -oP 'dev\.azure\.com/\K[^/]+/[^/]+' 
+   # or: ssh://[org]@dev.azure.com/v3/[org]/[project]/[repo]
+   ```
+3. If `team` not set and project has multiple teams, prompt user to set it in config
+
 **Step 1: Get current sprint iteration path**
 ```bash
-az boards iteration team list --team {team} --timeframe current -o json
+# Uses team from config or prompts if not set
+az boards iteration team list --team "{team}" --timeframe current -o json
 ```
 
 **Step 2: Query MY work items in the sprint** (project-scoped)
