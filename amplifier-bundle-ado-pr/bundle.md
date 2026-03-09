@@ -8,12 +8,9 @@ bundle:
 
     Includes: PR creation, discovery, comment review, work item linking.
 
-extends:
-  - ado-work-items:bundle
-
-behaviors:
-  include:
-    - ado-pr:behaviors/ado-pr
+includes:
+  - bundle: ../amplifier-bundle-ado-work-items/bundle.md
+  - bundle: ado-pr:behaviors/ado-pr
 
 tools:
   - module: tool-bash

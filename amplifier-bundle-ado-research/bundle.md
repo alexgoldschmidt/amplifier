@@ -13,14 +13,10 @@ bundle:
     - Authenticated: az login
     - Config file: .amplifier/ado-research-config.yaml
 
-extends: foundation
-
 includes:
+  - bundle: foundation
   - bundle: azure-devops:behaviors/azure-devops-extras
-
-behaviors:
-  include:
-    - ado-research:behaviors/ado-research
+  - bundle: ado-research:behaviors/ado-research
 
 tools:
   - module: tool-bash
