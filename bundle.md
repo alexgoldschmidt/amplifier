@@ -15,6 +15,10 @@ sources:
   ado-pr: ./amplifier-bundle-ado-pr
   ado-work-items: ./amplifier-bundle-ado-work-items
   ado-research: ./amplifier-bundle-ado-research
+  ado-kql: ./amplifier-bundle-ado-kql
+  ado-scrum: ./amplifier-bundle-ado-scrum
+  ado-test: ./amplifier-bundle-ado-test
+  ado-event-monitor: ./amplifier-ado-event-monitor
 ---
 
 # Amplifier Azure DevOps
