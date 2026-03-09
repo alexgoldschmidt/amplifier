@@ -18,6 +18,9 @@ meta:
     - Correlate telemetry with recent deployments/PRs
 
 model_role: reasoning
+
+tools:
+  - module: tool-bash
 ---
 
 # ADO KQL Analyst

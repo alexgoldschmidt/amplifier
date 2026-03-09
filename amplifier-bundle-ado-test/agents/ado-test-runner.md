@@ -19,6 +19,9 @@ meta:
     - Detect flaky tests from historical data
 
 model_role: coding
+
+tools:
+  - module: tool-bash
 ---
 
 # ADO Test Runner

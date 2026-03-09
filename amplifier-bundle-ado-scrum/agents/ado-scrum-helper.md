@@ -17,6 +17,9 @@ meta:
     - Track recurring meetings from config
 
 model_role: general
+
+tools:
+  - module: tool-bash
 ---
 
 # ADO Scrum Helper
