@@ -16,7 +16,7 @@ bundle:
     - Optional agent tags for specialized workflows
 
 includes:
-  - bundle: ./behaviors/ado-swe-agents.yaml
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-swe-agents/behaviors/ado-swe-agents.yaml
 
 tools:
   - module: tool-bash
