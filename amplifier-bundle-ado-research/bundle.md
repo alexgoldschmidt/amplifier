@@ -15,8 +15,8 @@ bundle:
 
 includes:
   - bundle: foundation
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-azure-devops/behaviors/azure-devops-extras.yaml
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-research/behaviors/ado-research.yaml
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-azure-devops
+  - bundle: ado-research:behaviors/ado-research
 
 tools:
   - module: tool-bash
