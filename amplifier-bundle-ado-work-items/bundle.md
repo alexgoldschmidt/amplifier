@@ -10,7 +10,7 @@ bundle:
     ado-pr for full PR + work item workflows.
 
 includes:
-  - bundle: ado-work-items:behaviors/ado-work-items
+  - bundle: ./behaviors/ado-work-items.yaml
 
 tools:
   - module: tool-bash
