@@ -5,8 +5,8 @@ bundle:
     PR lifecycle management agent and context.
     Composes with ado-work-items for work item linking.
 
-extends:
-  - ado-work-items:behaviors/ado-work-items
+includes:
+  - bundle: ado-work-items:behaviors/ado-work-items
 
 agents:
   include:
