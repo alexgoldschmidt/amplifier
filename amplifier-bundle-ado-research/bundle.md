@@ -1,9 +1,4 @@
 ---
-extends: foundation
-
-includes:
-  - bundle: azure-devops:behaviors/azure-devops-extras
-
 bundle:
   name: ado-research
   version: 1.0.0
@@ -18,14 +13,14 @@ bundle:
     - Authenticated: az login
     - Config file: .amplifier/ado-research-config.yaml
 
-agents:
-  include:
-    - ado-research:agents/ado-researcher
+extends: foundation
 
-context:
+includes:
+  - bundle: azure-devops:behaviors/azure-devops-extras
+
+behaviors:
   include:
-    - ado-research:context/docfx-navigation.md
-    - ado-research:context/research-cache-schema.md
+    - ado-research:behaviors/ado-research
 
 tools:
   - module: tool-bash

@@ -1,0 +1,14 @@
+bundle:
+  name: behavior-ado-research
+  version: 1.0.0
+  description: |
+    Lazy toc-driven research agent for EngHub documentation in ADO repos.
+
+agents:
+  include:
+    - ado-research:agents/ado-researcher
+
+context:
+  include:
+    - ado-research:context/docfx-navigation.md
+    - ado-research:context/research-cache-schema.md
