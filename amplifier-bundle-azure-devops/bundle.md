@@ -18,19 +18,19 @@ includes:
   # Foundation provides core tools (bash, filesystem, etc.)
   - bundle: foundation
   # Core bundles (ado-pr includes ado-work-items via composition)
-  - bundle: ../amplifier-bundle-ado-pr/bundle.md
+  - bundle: amplifier-bundle-ado-pr/bundle.md
   # Additional agents not in composed bundles
   - bundle: azure-devops:behaviors/azure-devops-extras
   # EngHub documentation research
-  - bundle: ../amplifier-bundle-ado-research/bundle.md
+  - bundle: amplifier-bundle-ado-research/bundle.md
   # Scrum and standup helpers
-  - bundle: ../amplifier-bundle-ado-scrum/bundle.md
+  - bundle: amplifier-bundle-ado-scrum/bundle.md
   # Test execution and analysis
-  - bundle: ../amplifier-bundle-ado-test/bundle.md
+  - bundle: amplifier-bundle-ado-test/bundle.md
   # KQL diagnostics
-  - bundle: ../amplifier-bundle-ado-kql/bundle.md
+  - bundle: amplifier-bundle-ado-kql/bundle.md
   # SWE Agent task management (GitHub Copilot auto-PR creation)
-  - bundle: ../amplifier-bundle-ado-swe-agents/bundle.md
+  - bundle: amplifier-bundle-ado-swe-agents/bundle.md
   # Dev machine bundle for autonomous development infrastructure
   - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
 
