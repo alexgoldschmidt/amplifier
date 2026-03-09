@@ -23,6 +23,12 @@ includes:
   - bundle: azure-devops:behaviors/azure-devops-extras
   # EngHub documentation research
   - bundle: ado-research:behaviors/ado-research
+  # Scrum and standup helpers
+  - bundle: ado-scrum:bundle
+  # Test execution and analysis
+  - bundle: ado-test:bundle
+  # KQL diagnostics
+  - bundle: ado-kql:bundle
   # Dev machine bundle for autonomous development infrastructure
   - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
 
@@ -36,9 +42,13 @@ Full Azure DevOps integration via `az devops` CLI.
 
 ```
 azure-devops (full suite)
+├── foundation
 ├── ado-pr (PR lifecycle)
 │   └── ado-work-items (work item management) ← foundational
 ├── ado-research (EngHub documentation research)
+├── ado-scrum (standup & journal tracking) ← NEW
+├── ado-test (test execution & analysis) ← NEW
+├── ado-kql (KQL diagnostics) ← NEW
 ├── ado-pipelines (pipeline ops)
 ├── ado-repos (repository ops)
 └── ado-boards (sprint management)
@@ -66,6 +76,9 @@ az devops project show
 | `ado-pipelines` | Pipelines: trigger, monitor, logs |
 | `ado-repos` | Repos: branches, commits (NOT PRs) |
 | `ado-boards` | Boards: sprints, backlog, iterations |
+| `ado-scrum-helper` | Standup generation, journal tracking, blocker detection |
+| `ado-test-runner` | Local tests, pipeline results, failure linking |
+| `ado-kql-analyst` | KQL queries, query library, Geneva diagnostics |
 
 ## Lighter Alternatives
 
