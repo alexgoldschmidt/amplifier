@@ -17,7 +17,7 @@ bundle:
 
 includes:
   # Foundation provides core tools (bash, filesystem, etc.)
-  - bundle: foundation
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
   # Core bundles (ado-pr includes ado-work-items via composition)
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-pr
   # Infrastructure: pipelines, repos, boards
