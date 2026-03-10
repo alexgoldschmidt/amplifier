@@ -8,7 +8,7 @@ bundle:
 
 includes:
   - bundle: foundation
-  - bundle: ./amplifier-bundle-azure-devops/bundle.md
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-azure-devops
 ---
 
 # Amplifier Azure DevOps
@@ -26,4 +26,4 @@ No `#subdirectory` needed - this root bundle includes everything.
 
 ## What's Included
 
-See [amplifier-bundle-azure-devops/bundle.md](./amplifier-bundle-azure-devops/bundle.md) for full details.
+See [amplifier-bundle-azure-devops/bundle.md](git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-azure-devops/bundle.md) for full details.
