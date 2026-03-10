@@ -33,7 +33,7 @@ includes:
   # SWE Agent task management (GitHub Copilot auto-PR creation)
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-swe-agents
   # Dev machine bundle for autonomous development infrastructure
-  - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@master
+  - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
 
 context:
   include:
