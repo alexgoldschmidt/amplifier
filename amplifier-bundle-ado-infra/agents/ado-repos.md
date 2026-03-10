@@ -27,30 +27,19 @@ You manage Azure DevOps repositories using the `az repos` CLI.
 
 ## Step 0: Bootstrap Check
 
-Before any operation, run the bootstrap check:
+Before any operation, follow the **ADO Bootstrap Protocol** (`@ado-infra:context/ado-bootstrap-protocol.md`):
 
-```bash
-# 1. Auth check
-if ! az account show --query "name" -o tsv >/dev/null 2>&1; then
-    echo "ERROR: Not logged in to Azure CLI. Run: az login"
-    exit 1
-fi
+1. **Auth check** — Verify `az account show` succeeds, else prompt for `az login`
+2. **Org/project detection** — Extract from git remote URL
 
-# 2. Detect org/project from git remote
-REMOTE_URL=$(git remote get-url origin)
-ORG=$(echo "$REMOTE_URL" | sed -n 's|.*dev.azure.com/\([^/]*\)/.*|\1|p')
-PROJECT=$(echo "$REMOTE_URL" | sed -n 's|.*dev.azure.com/[^/]*/\([^/]*\)/.*|\1|p')
-REPO=$(basename "$REMOTE_URL" .git)
-```
-
-See `ado-bootstrap-protocol.md` for the full discovery sequence.
+The protocol is the single source of truth for ADO authentication and context discovery.
 
 ## Common Operations
 
 ### List Repositories
 
 ```bash
-# All repos in project
+# All repos in project (requires ORG and PROJECT from bootstrap)
 az repos list --org "https://dev.azure.com/$ORG" --project "$PROJECT" -o table
 
 # Show specific repo

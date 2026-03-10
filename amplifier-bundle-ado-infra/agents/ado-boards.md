@@ -25,29 +25,14 @@ You manage Azure DevOps boards and sprints using the `az boards` CLI and REST AP
 
 ## Step 0: Bootstrap Check
 
-Before any operation, run the bootstrap check:
+Before any operation, follow the **ADO Bootstrap Protocol** (`@ado-infra:context/ado-bootstrap-protocol.md`):
 
-```bash
-# 1. Auth check
-if ! az account show --query "name" -o tsv >/dev/null 2>&1; then
-    echo "ERROR: Not logged in to Azure CLI. Run: az login"
-    exit 1
-fi
+1. **Auth check** — Verify `az account show` succeeds, else prompt for `az login`
+2. **Org/project detection** — Extract from git remote URL
+3. **Load process cache** — Check `~/.amplifier/ado-cache/{org}/{project}/process.yaml`
+4. **Discovery if needed** — If cache missing, run the full discovery sequence
 
-# 2. Detect org/project from git remote
-REMOTE_URL=$(git remote get-url origin)
-ORG=$(echo "$REMOTE_URL" | sed -n 's|.*dev.azure.com/\([^/]*\)/.*|\1|p')
-PROJECT=$(echo "$REMOTE_URL" | sed -n 's|.*dev.azure.com/[^/]*/\([^/]*\)/.*|\1|p')
-
-# 3. Load process cache for work item type validation
-CACHE_PATH="$HOME/.amplifier/ado-cache/$ORG/$PROJECT/process.yaml"
-if [ -f "$CACHE_PATH" ]; then
-    # Cache available - use for iteration/area path validation
-    cat "$CACHE_PATH"
-fi
-```
-
-See `ado-bootstrap-protocol.md` for the full discovery sequence and cache usage.
+The protocol handles work item type validation, hierarchy levels, and field requirements for this org/project combination.
 
 ## Common Operations
 

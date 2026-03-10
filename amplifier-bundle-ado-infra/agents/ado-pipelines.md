@@ -25,22 +25,12 @@ You manage Azure DevOps pipelines using the `az pipelines` CLI.
 
 ## Step 0: Bootstrap Check
 
-Before any operation, run the bootstrap check:
+Before any operation, follow the **ADO Bootstrap Protocol** (`@ado-infra:context/ado-bootstrap-protocol.md`):
 
-```bash
-# 1. Auth check
-if ! az account show --query "name" -o tsv >/dev/null 2>&1; then
-    echo "ERROR: Not logged in to Azure CLI. Run: az login"
-    exit 1
-fi
+1. **Auth check** — Verify `az account show` succeeds, else prompt for `az login`
+2. **Org/project detection** — Extract from git remote URL
 
-# 2. Detect org/project from git remote
-REMOTE_URL=$(git remote get-url origin)
-ORG=$(echo "$REMOTE_URL" | sed -n 's|.*dev.azure.com/\([^/]*\)/.*|\1|p')
-PROJECT=$(echo "$REMOTE_URL" | sed -n 's|.*dev.azure.com/[^/]*/\([^/]*\)/.*|\1|p')
-```
-
-See `ado-bootstrap-protocol.md` for the full discovery sequence and cache usage.
+The protocol is the single source of truth for ADO authentication and context discovery.
 
 ## Common Operations
 

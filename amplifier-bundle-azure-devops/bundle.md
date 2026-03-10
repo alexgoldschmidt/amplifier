@@ -9,6 +9,7 @@ bundle:
     For lighter usage, use individual bundles:
     - ado-work-items: Just work item management
     - ado-pr: PR lifecycle + work item linking
+    - ado-infra: Pipelines, repos, boards
     
     Prerequisites:
     - Azure CLI with devops extension: az extension add --name azure-devops
@@ -18,27 +19,31 @@ includes:
   # Foundation provides core tools (bash, filesystem, etc.)
   - bundle: foundation
   # Core bundles (ado-pr includes ado-work-items via composition)
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-pr
-  # Additional agents not in composed bundles
-  - bundle: azure-devops:behaviors/azure-devops-extras
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-pr
+  # Infrastructure: pipelines, repos, boards
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-infra
   # EngHub documentation research
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-research
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-research
   # Scrum and standup helpers
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-scrum
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-scrum
   # Test execution and analysis
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-test
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-test
   # KQL diagnostics
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-kql
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-kql
   # SWE Agent task management (GitHub Copilot auto-PR creation)
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-swe-agents
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-swe-agents
   # Dev machine bundle for autonomous development infrastructure
   - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
+
+context:
+  include:
+    - azure-devops:context/ado-routing.md
 
 ---
 
 # Azure DevOps Bundle
 
-Full Azure DevOps integration via `az devops` CLI.
+Full Azure DevOps integration via `az devops` CLI. **This is a pure aggregator — no local agents.**
 
 ## Bundle Composition
 
@@ -46,15 +51,16 @@ Full Azure DevOps integration via `az devops` CLI.
 azure-devops (full suite)
 ├── foundation
 ├── ado-pr (PR lifecycle)
-│   └── ado-work-items (work item management) ← foundational
+│   └── ado-work-items (work item management)
+├── ado-infra (infrastructure)
+│   ├── ado-pipelines (pipeline ops)
+│   ├── ado-repos (repository ops)
+│   └── ado-boards (sprint management)
 ├── ado-research (EngHub documentation research)
-├── ado-scrum (standup & journal tracking) ← NEW
-├── ado-test (test execution & analysis) ← NEW
-├── ado-kql (KQL diagnostics) ← NEW
-├── ado-swe-agents (GitHub Copilot SWE Agent tasks) ← NEW
-├── ado-pipelines (pipeline ops)
-├── ado-repos (repository ops)
-└── ado-boards (sprint management)
+├── ado-scrum (standup & journal tracking)
+├── ado-test (test execution & analysis)
+├── ado-kql (KQL diagnostics)
+└── ado-swe-agents (GitHub Copilot SWE Agent tasks)
 ```
 
 ## Quick Start
@@ -88,14 +94,18 @@ az devops project show
 
 ```yaml
 # Just work items (sprint planning, triage, no code)
-extends:
-  - ado-work-items:bundle
+includes:
+  - bundle: ado-work-items
 
 # PRs + work items (most common dev workflow)
-extends:
-  - ado-pr:bundle
+includes:
+  - bundle: ado-pr
+
+# Infrastructure only (pipelines, repos, boards)
+includes:
+  - bundle: ado-infra
 
 # Full suite (everything)
-extends:
-  - azure-devops:bundle
+includes:
+  - bundle: azure-devops
 ```
