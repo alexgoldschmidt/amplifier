@@ -19,9 +19,7 @@ context:
   include:
     - ado-pr:context/ado-pr-comments-api.md
 
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
+
 ---
 
 # ADO PR Bundle

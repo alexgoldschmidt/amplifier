@@ -29,14 +29,14 @@ Add to your bundle:
 
 ```yaml
 includes:
-  - bundle: git+https://github.com/microsoft/amplifier-bundle-azure-devops@main
+  - bundle: git+https://github.com/microsoft/amplifier-bundle-azure-devops@master
 ```
 
 Or include just the behavior:
 
 ```yaml
 includes:
-  - bundle: git+https://github.com/microsoft/amplifier-bundle-azure-devops@main#subdirectory=behaviors/azure-devops.yaml
+  - bundle: git+https://github.com/microsoft/amplifier-bundle-azure-devops@master#subdirectory=behaviors/azure-devops.yaml
 ```
 
 ## Available Agents

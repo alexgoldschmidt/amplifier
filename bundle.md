@@ -7,7 +7,6 @@ bundle:
     Re-exports the full azure-devops bundle for simpler git references.
 
 includes:
-  - bundle: foundation
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-azure-devops
 ---
 

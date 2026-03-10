@@ -19,21 +19,21 @@ includes:
   # Foundation provides core tools (bash, filesystem, etc.)
   - bundle: foundation
   # Core bundles (ado-pr includes ado-work-items via composition)
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-pr
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-pr
   # Infrastructure: pipelines, repos, boards
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-infra
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-infra
   # EngHub documentation research
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-research
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-research
   # Scrum and standup helpers
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-scrum
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-scrum
   # Test execution and analysis
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-test
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-test
   # KQL diagnostics
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-kql
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-kql
   # SWE Agent task management (GitHub Copilot auto-PR creation)
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@main#subdirectory=amplifier-bundle-ado-swe-agents
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-swe-agents
   # Dev machine bundle for autonomous development infrastructure
-  - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
+  - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@master
 
 context:
   include:
