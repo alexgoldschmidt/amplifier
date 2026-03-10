@@ -9,8 +9,18 @@ bundle:
     Use independently for project management tasks, or compose with
     ado-pr for full PR + work item workflows.
 
-includes:
-  - bundle: ado-work-items:behaviors/ado-work-items
+agents:
+  include:
+    - ado-work-items:agents/ado-work-items
+    - ado-work-items:agents/ado-boards
+
+context:
+  include:
+    - ado-work-items:context/ado-auth.md
+    - ado-work-items:context/ado-bootstrap-protocol.md
+    - ado-work-items:context/ado-team-config-reference.md
+    - ado-work-items:context/ado-work-item-templates.md
+    - ado-work-items:context/ado-wiql-reference.md
 
 tools:
   - module: tool-bash

@@ -10,7 +10,14 @@ bundle:
 
 includes:
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-work-items
-  - bundle: ado-pr:behaviors/ado-pr
+
+agents:
+  include:
+    - ado-pr:agents/ado-pr-manager
+
+context:
+  include:
+    - ado-pr:context/ado-pr-comments-api.md
 
 tools:
   - module: tool-bash

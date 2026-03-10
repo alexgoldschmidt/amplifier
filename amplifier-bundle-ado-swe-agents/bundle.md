@@ -15,8 +15,13 @@ bundle:
     - Repository link (artifact link OR copilot:repo tag)
     - Optional agent tags for specialized workflows
 
-includes:
-  - bundle: ado-swe-agents:behaviors/ado-swe-agents
+agents:
+  include:
+    - ado-swe-agents:agents/ado-swe-agent
+
+context:
+  include:
+    - ado-swe-agents:context/swe-agent-protocol.md
 
 tools:
   - module: tool-bash

@@ -16,7 +16,15 @@ bundle:
 includes:
   - bundle: foundation
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-azure-devops
-  - bundle: ado-research:behaviors/ado-research
+
+agents:
+  include:
+    - ado-research:agents/ado-researcher
+
+context:
+  include:
+    - ado-research:context/docfx-navigation.md
+    - ado-research:context/research-cache-schema.md
 
 tools:
   - module: tool-bash
