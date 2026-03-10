@@ -202,3 +202,5 @@ curl -s -X PATCH \
   "https://dev.azure.com/$ORG/$PROJECT/_apis/git/repositories/$REPO/pullRequests/$PR_ID/threads/$THREAD_ID?api-version=7.1" \
   -d '{"status": "fixed"}'
 ```
+
+

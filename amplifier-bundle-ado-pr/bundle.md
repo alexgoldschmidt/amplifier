@@ -18,6 +18,7 @@ agents:
 context:
   include:
     - ado-pr:context/ado-pr-comments-api.md
+    - ado-pr:context/pr-table-formatting.md
 
 
 ---
@@ -51,4 +52,5 @@ This automatically includes `ado-work-items` for work item management.
 ## Context Files
 
 - `ado-pr-comments-api.md` — REST API for PR threads and comments
+- `pr-table-formatting.md` — PR summary table formatting for Amplifier's streaming UI
 - Inherits auth, bootstrap, templates from `ado-work-items`
