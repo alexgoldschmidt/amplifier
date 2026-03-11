@@ -14,7 +14,7 @@ bundle:
     - Optional: .amplifier/scrum-config.yaml for team rituals
 
 includes:
-  - bundle: foundation
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
 agents:
   include:
@@ -24,10 +24,6 @@ context:
   include:
     - ado-scrum:context/scrum-config-schema.md
     - ado-scrum:context/scrum-workflow.md
-
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO Scrum Bundle
