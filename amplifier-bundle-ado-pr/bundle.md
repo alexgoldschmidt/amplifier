@@ -9,6 +9,7 @@ bundle:
     Includes: PR creation, discovery, comment review, work item linking.
 
 includes:
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-work-items
 
 agents:
