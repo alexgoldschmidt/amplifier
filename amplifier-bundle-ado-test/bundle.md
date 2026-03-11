@@ -24,10 +24,7 @@ context:
   include:
     - ado-test:context/test-config-schema.md
     - ado-test:context/trx-parsing.md
-
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
+    
 ---
 
 # ADO Test Bundle
