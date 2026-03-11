@@ -19,21 +19,10 @@ discovery:
       filter: assigned_to_me
       poll_interval: 60s
     
-    - org: microsoft
-      project: universalstore
-      repo: COST.Ingestion.OfferStore
-      filter: assigned_to_me
-      poll_interval: 60s
-
   work_items:
     # Work items assigned to me in each project
     - org: msazure
       project: One
-      filter: assigned_to_me
-      poll_interval: 120s
-    
-    - org: microsoft
-      project: universalstore
       filter: assigned_to_me
       poll_interval: 120s
     
