@@ -14,7 +14,7 @@ bundle:
     - Optional: Geneva cluster access for Geneva Actions
 
 includes:
-  - bundle: foundation
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
 agents:
   include:
@@ -25,9 +25,6 @@ context:
     - ado-kql:context/kql-reference.md
     - ado-kql:context/query-library-schema.md
 
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO KQL Bundle
