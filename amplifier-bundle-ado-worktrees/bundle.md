@@ -23,10 +23,6 @@ agents:
 context:
   include:
     - ado-worktrees:context/worktree-workflow.md
-
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO Worktrees Bundle

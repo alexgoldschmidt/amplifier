@@ -22,10 +22,6 @@ agents:
 context:
   include:
     - ado-swe-agents:context/swe-agent-protocol.md
-
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO SWE Agents Bundle
