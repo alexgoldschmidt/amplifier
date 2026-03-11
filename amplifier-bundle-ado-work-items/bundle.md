@@ -9,6 +9,10 @@ bundle:
     Use independently for project management tasks, or compose with
     ado-pr for full PR + work item workflows.
 
+includes:
+  # Foundation provides core tools (bash, filesystem, etc.)
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
+
 agents:
   include:
     - ado-work-items:agents/ado-work-items
@@ -24,9 +28,6 @@ context:
     - ado-work-items:context/work-stream-discovery.md
     - ado-work-items:context/team-iteration-discovery.md
 
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO Work Items Bundle
