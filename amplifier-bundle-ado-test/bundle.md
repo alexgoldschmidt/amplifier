@@ -14,7 +14,7 @@ bundle:
     - Optional: Docker for docker-compose testing
 
 includes:
-  - bundle: foundation
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
 agents:
   include:
