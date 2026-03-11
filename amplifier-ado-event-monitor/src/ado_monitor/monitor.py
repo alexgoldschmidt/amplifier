@@ -14,6 +14,11 @@ from .differ import IGNORE_AUTHORS, diff_snapshots
 from .dispatcher import Dispatcher
 from .models import Subscription
 from .poller import ADOClient, Poller
+from .sources import (
+    CompositeSubscriptionSource,
+    DiscoverySubscriptionSource,
+    YamlSubscriptionSource,
+)
 from .state import StateStore
 
 logger = logging.getLogger(__name__)
@@ -191,6 +196,33 @@ async def run_monitor(
     """
     config = Config.from_file(config_path)
     state_store = StateStore(db_path or "ado_monitor.db")
+
+    # Build subscription sources
+    sources = []
+
+    # Static subscriptions from YAML
+    if config.subscriptions:
+        sources.append(YamlSubscriptionSource(config.subscriptions))
+
+    # Discovery source for dynamic PR/WI discovery
+    if config.pr_discovery or config.wi_discovery:
+        discovery_source = DiscoverySubscriptionSource(
+            pr_configs=config.pr_discovery,
+            wi_configs=config.wi_discovery,
+        )
+        sources.append(discovery_source)
+
+    # Run initial discovery to populate subscriptions
+    if sources:
+        composite = CompositeSubscriptionSource(sources)
+        discovered_subs = await composite.get_subscriptions()
+        logger.info(f"Discovered {len(discovered_subs)} total subscriptions")
+
+        # Merge discovered subscriptions into config
+        # (static ones are already in config.subscriptions)
+        for sub in discovered_subs:
+            if sub.id not in {s.id for s in config.subscriptions}:
+                config.subscriptions.append(sub)
 
     monitor = Monitor(config, state_store)
     await monitor.start()

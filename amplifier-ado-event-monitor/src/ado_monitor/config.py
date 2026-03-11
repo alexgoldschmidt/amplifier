@@ -4,13 +4,14 @@ Parses the subscription configuration file that defines what ADO entities
 to watch and what actions to take when events are detected.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from .models import Action, Subscription, SubscriptionType
+from .sources import PRDiscoveryConfig, WorkItemDiscoveryConfig
 
 
 @dataclass
@@ -19,6 +20,8 @@ class Config:
 
     subscriptions: list[Subscription]
     ignore_authors: set[str]
+    pr_discovery: list[PRDiscoveryConfig] = field(default_factory=list)
+    wi_discovery: list[WorkItemDiscoveryConfig] = field(default_factory=list)
 
     @classmethod
     def from_file(cls, path: Path | str) -> "Config":
@@ -51,7 +54,39 @@ class Config:
 
         ignore_authors = set(data.get("ignore_authors", ["Amplifier Bot", "amplifier[bot]"]))
 
-        return cls(subscriptions=subscriptions, ignore_authors=ignore_authors)
+        # Parse discovery section
+        pr_discovery = []
+        wi_discovery = []
+        discovery = data.get("discovery", {})
+
+        for pr_cfg in discovery.get("pull_requests", []):
+            pr_discovery.append(
+                PRDiscoveryConfig(
+                    org=pr_cfg["org"],
+                    project=pr_cfg["project"],
+                    repo=pr_cfg["repo"],
+                    filter=pr_cfg.get("filter", "assigned_to_me"),
+                    poll_interval_seconds=_parse_duration(pr_cfg.get("poll_interval", "60s")),
+                )
+            )
+
+        for wi_cfg in discovery.get("work_items", []):
+            wi_discovery.append(
+                WorkItemDiscoveryConfig(
+                    org=wi_cfg["org"],
+                    project=wi_cfg["project"],
+                    filter=wi_cfg.get("filter", "assigned_to_me"),
+                    area_path=wi_cfg.get("area_path"),
+                    poll_interval_seconds=_parse_duration(wi_cfg.get("poll_interval", "120s")),
+                )
+            )
+
+        return cls(
+            subscriptions=subscriptions,
+            ignore_authors=ignore_authors,
+            pr_discovery=pr_discovery,
+            wi_discovery=wi_discovery,
+        )
 
 
 def _parse_subscription(data: dict[str, Any]) -> Subscription:

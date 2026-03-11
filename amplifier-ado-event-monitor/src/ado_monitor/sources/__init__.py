@@ -50,6 +50,7 @@ class SubscriptionSource(Protocol):
 
 # Re-export implementations for convenience
 from .composite import CompositeSubscriptionSource
+from .discovery import DiscoverySubscriptionSource, PRDiscoveryConfig, WorkItemDiscoveryConfig
 from .foreman import ForemanSubscriptionSource
 from .yaml_source import YamlSubscriptionSource
 
@@ -58,4 +59,7 @@ __all__ = [
     "YamlSubscriptionSource",
     "ForemanSubscriptionSource",
     "CompositeSubscriptionSource",
+    "DiscoverySubscriptionSource",
+    "PRDiscoveryConfig",
+    "WorkItemDiscoveryConfig",
 ]
