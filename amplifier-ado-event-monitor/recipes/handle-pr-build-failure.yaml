@@ -1,16 +1,15 @@
 # Handle PR Build Failure Recipe
 # Triggered when a PR's CI/build status changes to failed
 #
-# Behavior:
-# 1. Fetch the build failure details
-# 2. Diagnose the root cause
-# 3. If fixable: make the fix and push
-# 4. Comment on PR with diagnosis and action taken
+# Execution Strategy:
+# - If you are the PR author → Use worktree to fix and push
+# - If you are a reviewer → Comment only (inform author)
+# - Worktrees enable parallel handling of multiple PRs simultaneously
 
 name: handle-pr-build-failure
 description: |
   Diagnose PR build/test failures and attempt fixes.
-  Makes code changes when the fix is clear, comments with diagnosis.
+  Uses worktrees for code changes to enable parallel PR handling.
 
 context:
   required:
@@ -22,39 +21,81 @@ context:
     - failure_type   # "build", "test", "policy"
   optional:
     - build_url      # Link to build details
+    - repo_path      # Local path to the repository
 
 steps:
-  - name: fetch-failure-details
+  - name: determine-role-and-fetch-details
     agent: azure-devops:ado-pr-manager
     instruction: |
-      Fetch build failure details:
+      Fetch PR context and build failure details:
       
       Org: {{org}}
       Project: {{project}}
+      Repo: {{repo}}
       PR ID: {{pr_id}}
       Build ID: {{build_id}}
       
       Get:
-      1. Which stage/job failed
-      2. The error message and relevant log snippet
-      3. The PR branch name and latest commit
-      4. What files were changed in the PR
+      1. PR author - who created this PR?
+      2. Am I the author or a reviewer?
+      3. Source branch name
+      4. Which stage/job failed
+      5. Error message and relevant log snippet
+      6. Files changed in the PR
       
-      Return structured failure analysis.
+      Return JSON:
+      {
+        "pr_author": "<author>",
+        "i_am_author": true/false,
+        "source_branch": "<branch>",
+        "failure_stage": "<stage name>",
+        "error_message": "<error>",
+        "log_snippet": "<relevant logs>",
+        "changed_files": ["<files>"]
+      }
 
   - name: diagnose-and-fix
     agent: foundation:bug-hunter
     instruction: |
-      Diagnose this CI failure and fix if possible:
+      Context: {{steps.determine-role-and-fetch-details.output}}
       
       Failure Type: {{failure_type}}
-      Details: {{steps.fetch-failure-details.output}}
       
-      ## Decision Framework
+      ## Execution Strategy Decision
+      
+      **If i_am_author is FALSE (I'm a reviewer):**
+      - ONLY comment on the PR to inform the author
+      - Provide diagnosis but do NOT make code changes
+      - Use `az repos pr comment` to post analysis
+      
+      **If i_am_author is TRUE:**
+      - Use WORKTREE strategy for isolation:
+      
+      ```bash
+      # 1. Create/reuse worktree for this PR
+      PR_BRANCH="{{source_branch}}"
+      WORKTREE_PATH="../{{repo}}-pr-{{pr_id}}"
+      
+      # Check if worktree already exists
+      if [ -d "$WORKTREE_PATH" ]; then
+        cd "$WORKTREE_PATH"
+        git fetch origin "$PR_BRANCH"
+        git checkout "$PR_BRANCH"
+        git pull origin "$PR_BRANCH"
+      else
+        git fetch origin "$PR_BRANCH"
+        git worktree add "$WORKTREE_PATH" "origin/$PR_BRANCH"
+        cd "$WORKTREE_PATH"
+      fi
+      
+      # 2. Diagnose and fix in the worktree
+      ```
+      
+      ## Fix Decision Framework
       
       1. **If compilation/build error:**
          - Identify the syntax/type error
-         - Fix the code
+         - Fix the code in worktree
          - Commit and push
       
       2. **If test failure:**
@@ -69,13 +110,20 @@ steps:
       
       4. **If infrastructure/environment issue:**
          - Don't attempt fix
-         - Document the issue for manual intervention
+         - Comment documenting the issue
       
-      ## After Action
+      ```bash
+      # 3. If fix applied, commit and push from worktree
+      git add .
+      git commit -m "Fix build failure: <brief description>
+      
+      Fixes {{failure_type}} failure in build {{build_id}}"
+      git push origin "$PR_BRANCH"
+      ```
       
       Report:
       - diagnosis: what went wrong
-      - action_taken: "fixed and pushed" or "requires manual intervention"
+      - action_taken: "fixed and pushed" or "requires manual intervention" or "commented (reviewer only)"
       - commit_sha: if fix was pushed
 
   - name: comment-on-pr
@@ -86,7 +134,10 @@ steps:
       {{steps.diagnose-and-fix.output}}
       
       Format the comment professionally:
-      - Start with "Build failure diagnosed:"
-      - Explain what failed
+      - Start with "Build failure analysis:"
+      - Explain what failed and why
       - If fixed: "Fixed in commit [sha]"
       - If not fixable automatically: "Requires manual attention: [reason]"
+      - If reviewer-only: "Diagnosis for author's reference: [details]"
+      
+      Note: Do NOT remove worktree - keep for future PR work

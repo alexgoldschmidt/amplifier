@@ -1,16 +1,15 @@
 # Handle PR Comment Recipe
 # Triggered when a PR receives new review comments
 #
-# Behavior:
-# 1. Fetch the PR and comment details
-# 2. Analyze what the comment is asking for
-# 3. If code changes needed: make the changes and push
-# 4. Reply to the comment thread with what was done
+# Execution Strategy:
+# - If you are the PR author AND code changes needed → Use worktree
+# - If you are a reviewer → Comment only (no code changes)
+# - Worktrees enable parallel handling of multiple PRs simultaneously
 
 name: handle-pr-comment
 description: |
   Analyze PR review comments and take appropriate action.
-  Makes code changes when requested, replies to threads.
+  Uses worktrees for code changes to enable parallel PR handling.
 
 context:
   required:
@@ -25,12 +24,13 @@ context:
   optional:
     - file_path     # File the comment is on (if inline comment)
     - line_number   # Line number (if inline comment)
+    - repo_path     # Local path to the repository
 
 steps:
-  - name: fetch-context
+  - name: determine-role-and-context
     agent: azure-devops:ado-pr-manager
     instruction: |
-      Fetch full context for PR comment response:
+      Fetch PR context and determine execution strategy:
       
       Org: {{org}}
       Project: {{project}}
@@ -38,58 +38,95 @@ steps:
       PR ID: {{pr_id}}
       
       Get:
-      1. PR title and description
-      2. The full comment thread (thread_id: {{thread_id}})
-      3. The specific file/line context if this is an inline comment
+      1. PR author - who created this PR?
+      2. Am I the author or a reviewer?
+      3. PR title, description, and source branch name
+      4. The full comment thread (thread_id: {{thread_id}})
+      5. File/line context if inline comment:
          - File: {{file_path}}
          - Line: {{line_number}}
-      4. Current PR status (draft, active, etc.)
       
-      Return structured JSON with all context.
+      Return JSON:
+      {
+        "pr_author": "<author name>",
+        "i_am_author": true/false,
+        "source_branch": "<branch name>",
+        "target_branch": "<target branch>",
+        "thread_context": "<full thread>",
+        "requires_code_change": true/false (based on comment analysis)
+      }
 
   - name: analyze-and-act
     agent: azure-devops:ado-pr-responder
     instruction: |
-      Analyze this PR comment and take action:
+      Context from previous step:
+      {{steps.determine-role-and-context.output}}
       
       Comment by: {{comment_author}}
       Comment text: {{comment_text}}
       
-      PR Context:
-      {{steps.fetch-context.output}}
+      ## Execution Strategy Decision
       
-      ## Decision Framework
+      **If i_am_author is FALSE (I'm a reviewer):**
+      - ONLY comment - do not make code changes
+      - Reply to thread with analysis, suggestions, or answers
+      - Use `az repos pr comment` to post reply
       
-      1. **If comment requests code change:**
-         - Checkout the PR branch
-         - Make the requested change
-         - Commit with message referencing the comment
-         - Push the commit
-         - Reply to thread: "Done in commit [sha]. [brief description of change]"
+      **If i_am_author is TRUE AND requires_code_change is TRUE:**
+      - Use WORKTREE strategy for isolation:
       
-      2. **If comment asks a question:**
-         - Analyze the code/context to find the answer
-         - Reply to thread with a clear answer
+      ```bash
+      # 1. Create/reuse worktree for this PR
+      PR_BRANCH="{{source_branch}}"
+      WORKTREE_PATH="../{{repo}}-pr-{{pr_id}}"
       
-      3. **If comment is approval/positive feedback:**
-         - Reply with brief acknowledgment: "Thanks for the review!"
+      # Check if worktree already exists
+      if [ -d "$WORKTREE_PATH" ]; then
+        cd "$WORKTREE_PATH"
+        git fetch origin "$PR_BRANCH"
+        git checkout "$PR_BRANCH"
+        git pull origin "$PR_BRANCH"
+      else
+        # Create new worktree
+        git fetch origin "$PR_BRANCH"
+        git worktree add "$WORKTREE_PATH" "origin/$PR_BRANCH"
+        cd "$WORKTREE_PATH"
+      fi
       
-      4. **If comment is unclear:**
-         - Reply asking for clarification
+      # 2. Make the requested changes in the worktree
+      # ... edit files ...
       
-      5. **If comment is a nit/suggestion (optional):**
-         - Reply: "Noted for future. [or] Applied in [commit]."
+      # 3. Commit and push from worktree
+      git add .
+      git commit -m "Address review feedback: <brief description>
       
-      ## Important
+      Addresses comment in thread {{thread_id}}"
+      git push origin "$PR_BRANCH"
+      
+      # 4. Reply to thread with commit reference
+      ```
+      
+      **If i_am_author is TRUE AND requires_code_change is FALSE:**
+      - Just reply to the comment thread
+      - Answer questions, acknowledge feedback, etc.
+      
+      ## Reply Guidelines
       - Always reply to the comment thread
-      - If making code changes, ensure tests still pass before pushing
-      - Reference commit SHA in reply when changes are made
+      - If code changes made: "Done in commit [sha]. [description]"
+      - If question: Provide clear answer
+      - If unclear: Ask for clarification
+      
+      Report: action taken, commit sha (if applicable), reply posted
 
-  - name: verify-response
+  - name: cleanup-and-verify
     agent: azure-devops:ado-pr-manager
     instruction: |
-      Verify the action was completed:
+      Verify the action completed successfully:
       
-      1. If code was pushed: confirm the commit appears on the PR
-      2. Confirm the reply was posted to thread {{thread_id}}
-      3. Report final status
+      Based on: {{steps.analyze-and-act.output}}
+      
+      1. If code was pushed: verify commit appears on PR
+      2. Confirm reply was posted to thread {{thread_id}}
+      3. Note: Do NOT remove worktree - keep for future PR comments
+      
+      Report final status.

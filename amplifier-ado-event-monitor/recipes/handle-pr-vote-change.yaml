@@ -1,14 +1,15 @@
 # Handle PR Vote Change Recipe
 # Triggered when reviewer votes change (approve, reject, wait)
 #
-# Behavior:
-# 1. Check new vote status
-# 2. If all approvals met: comment that PR is ready to merge
-# 3. If rejected/changes requested: fetch the feedback and respond
+# Execution Strategy:
+# - If you are the PR author AND vote has feedback → Use worktree for changes
+# - If you are a reviewer → Comment only
+# - Worktrees enable parallel handling of multiple PRs simultaneously
 
 name: handle-pr-vote-change
 description: |
   Handle PR vote changes - check approval status and respond accordingly.
+  Uses worktrees for code changes to enable parallel PR handling.
 
 context:
   required:
@@ -20,31 +21,41 @@ context:
     - vote_type      # "approved", "rejected", "waitingForAuthor", "noVote"
   optional:
     - vote_comment   # Comment left with the vote
+    - repo_path      # Local path to the repository
 
 steps:
-  - name: check-approval-status
+  - name: determine-role-and-status
     agent: azure-devops:ado-pr-manager
     instruction: |
-      Check the current approval status of PR #{{pr_id}}:
+      Fetch PR context and approval status:
       
       Org: {{org}}
       Project: {{project}}
       Repo: {{repo}}
+      PR ID: {{pr_id}}
       
       Get:
-      1. All reviewer votes (who approved, who rejected, who's waiting)
-      2. Required reviewers vs optional
-      3. Policy status (are all required policies satisfied?)
-      4. Build status
+      1. PR author - who created this PR?
+      2. Am I the author or a reviewer?
+      3. Source branch name
+      4. All reviewer votes (who approved, who rejected, who's waiting)
+      5. Required reviewers vs optional
+      6. Policy status (are all required policies satisfied?)
+      7. Build status
       
-      Return:
-      - all_required_approved: true/false
-      - blocking_reviewers: [list of names]
-      - policy_status: pass/fail
-      - build_status: pass/fail/running
+      Return JSON:
+      {
+        "pr_author": "<author>",
+        "i_am_author": true/false,
+        "source_branch": "<branch>",
+        "all_required_approved": true/false,
+        "blocking_reviewers": ["<names>"],
+        "policy_status": "pass/fail",
+        "build_status": "pass/fail/running"
+      }
 
   - name: respond-to-vote
-    agent: azure-devops:ado-pr-manager
+    agent: azure-devops:ado-pr-responder
     instruction: |
       Vote change detected on PR #{{pr_id}}:
       
@@ -52,22 +63,71 @@ steps:
       Vote: {{vote_type}}
       Comment: {{vote_comment}}
       
-      Current status:
-      {{steps.check-approval-status.output}}
+      Context: {{steps.determine-role-and-status.output}}
       
-      ## Actions Based on Vote
+      ## Execution Strategy Decision
       
-      **If vote_type is "approved" AND all_required_approved:**
+      **If i_am_author is FALSE (I'm a reviewer):**
+      - ONLY comment if appropriate
+      - Do NOT make code changes
+      
+      **If i_am_author is TRUE:**
+      
+      ### If vote_type is "approved" AND all_required_approved:
       - Comment: "All required approvals received. PR is ready to merge."
       - Do NOT auto-merge (leave that to human)
       
-      **If vote_type is "rejected" or "waitingForAuthor":**
-      - If vote_comment exists: analyze what changes are requested
-      - Comment acknowledging the feedback
-      - If changes are clear and actionable: make the changes and push
-      - Reply: "Addressed feedback in commit [sha]" or "Need clarification on [specific point]"
+      ### If vote_type is "rejected" or "waitingForAuthor":
+      - Analyze vote_comment for requested changes
+      - If changes are clear and actionable → Use WORKTREE:
       
-      **If vote_type is "noVote" (vote removed):**
+      ```bash
+      # 1. Create/reuse worktree for this PR
+      PR_BRANCH="{{source_branch}}"
+      WORKTREE_PATH="../{{repo}}-pr-{{pr_id}}"
+      
+      # Check if worktree already exists
+      if [ -d "$WORKTREE_PATH" ]; then
+        cd "$WORKTREE_PATH"
+        git fetch origin "$PR_BRANCH"
+        git checkout "$PR_BRANCH"
+        git pull origin "$PR_BRANCH"
+      else
+        git fetch origin "$PR_BRANCH"
+        git worktree add "$WORKTREE_PATH" "origin/$PR_BRANCH"
+        cd "$WORKTREE_PATH"
+      fi
+      
+      # 2. Make the requested changes in the worktree
+      # ... edit files based on feedback ...
+      
+      # 3. Commit and push from worktree
+      git add .
+      git commit -m "Address review feedback from {{voter_name}}
+      
+      Responds to {{vote_type}} vote"
+      git push origin "$PR_BRANCH"
+      ```
+      
+      - Reply: "Addressed feedback in commit [sha]"
+      
+      - If changes are unclear → Reply asking for clarification
+      
+      ### If vote_type is "noVote" (vote removed):
       - No action needed, just log
       
-      Report what action was taken.
+      Report: action taken, commit sha (if applicable), reply posted
+
+  - name: verify-status
+    agent: azure-devops:ado-pr-manager
+    instruction: |
+      Verify action completed and check current PR status:
+      
+      Based on: {{steps.respond-to-vote.output}}
+      
+      1. If code was pushed: verify commit appears on PR
+      2. If reply was posted: confirm it's visible
+      3. Check updated approval status
+      4. Note: Do NOT remove worktree - keep for future PR work
+      
+      Final status report.
