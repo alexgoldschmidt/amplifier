@@ -12,7 +12,7 @@ bundle:
     - Authenticated: az login
 
 includes:
-  - bundle: foundation
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
 agents:
   include:
@@ -25,9 +25,6 @@ context:
     - ado-infra:context/ado-bootstrap-protocol.md
     - ado-infra:context/ado-cli-reference.md
 
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO Infrastructure Bundle
