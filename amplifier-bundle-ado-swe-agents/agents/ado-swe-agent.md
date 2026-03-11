@@ -19,10 +19,6 @@ meta:
     ALWAYS delegate to this agent.
 
 model_role: fast
-
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO SWE Agent Task Manager

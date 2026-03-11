@@ -11,10 +11,6 @@ meta:
     - User is done with a worktree and wants to clean up
 
 model_role: fast
-
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # Worktree Coordinator
