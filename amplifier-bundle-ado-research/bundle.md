@@ -14,7 +14,7 @@ bundle:
     - Config file: .amplifier/ado-research-config.yaml
 
 includes:
-  - bundle: foundation
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
 agents:
   include:
@@ -25,9 +25,6 @@ context:
     - ado-research:context/docfx-navigation.md
     - ado-research:context/research-cache-schema.md
 
-tools:
-  - module: tool-bash
-    source: git+https://github.com/microsoft/amplifier-module-tool-bash@v1.0.0
 ---
 
 # ADO Research Bundle
