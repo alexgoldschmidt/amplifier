@@ -13,7 +13,10 @@ bundle:
     - Continuing work on items with existing PRs
     - Need full local tooling access
 
+
 includes:
+  # Foundation provides core tools (bash, filesystem, etc.)
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-work-items
 
 agents:
