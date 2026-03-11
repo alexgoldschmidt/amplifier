@@ -1,0 +1,92 @@
+# Handle PR Build Failure Recipe
+# Triggered when a PR's CI/build status changes to failed
+#
+# Behavior:
+# 1. Fetch the build failure details
+# 2. Diagnose the root cause
+# 3. If fixable: make the fix and push
+# 4. Comment on PR with diagnosis and action taken
+
+name: handle-pr-build-failure
+description: |
+  Diagnose PR build/test failures and attempt fixes.
+  Makes code changes when the fix is clear, comments with diagnosis.
+
+context:
+  required:
+    - org
+    - project
+    - repo
+    - pr_id
+    - build_id       # Build ID that failed
+    - failure_type   # "build", "test", "policy"
+  optional:
+    - build_url      # Link to build details
+
+steps:
+  - name: fetch-failure-details
+    agent: azure-devops:ado-pr-manager
+    instruction: |
+      Fetch build failure details:
+      
+      Org: {{org}}
+      Project: {{project}}
+      PR ID: {{pr_id}}
+      Build ID: {{build_id}}
+      
+      Get:
+      1. Which stage/job failed
+      2. The error message and relevant log snippet
+      3. The PR branch name and latest commit
+      4. What files were changed in the PR
+      
+      Return structured failure analysis.
+
+  - name: diagnose-and-fix
+    agent: foundation:bug-hunter
+    instruction: |
+      Diagnose this CI failure and fix if possible:
+      
+      Failure Type: {{failure_type}}
+      Details: {{steps.fetch-failure-details.output}}
+      
+      ## Decision Framework
+      
+      1. **If compilation/build error:**
+         - Identify the syntax/type error
+         - Fix the code
+         - Commit and push
+      
+      2. **If test failure:**
+         - Identify which test failed and why
+         - If test is correct and code is wrong: fix the code
+         - If test is flaky/outdated: note for manual review
+         - Commit fix and push
+      
+      3. **If policy failure (formatting, linting):**
+         - Run the fixer (ruff, prettier, etc.)
+         - Commit and push
+      
+      4. **If infrastructure/environment issue:**
+         - Don't attempt fix
+         - Document the issue for manual intervention
+      
+      ## After Action
+      
+      Report:
+      - diagnosis: what went wrong
+      - action_taken: "fixed and pushed" or "requires manual intervention"
+      - commit_sha: if fix was pushed
+
+  - name: comment-on-pr
+    agent: azure-devops:ado-pr-manager
+    instruction: |
+      Post a comment on PR #{{pr_id}} summarizing:
+      
+      {{steps.diagnose-and-fix.output}}
+      
+      Format the comment professionally:
+      - Start with "Build failure diagnosed:"
+      - Explain what failed
+      - If fixed: "Fixed in commit [sha]"
+      - If not fixable automatically: "Requires manual attention: [reason]"

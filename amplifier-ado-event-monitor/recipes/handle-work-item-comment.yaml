@@ -1,0 +1,104 @@
+# Handle Work Item Comment Recipe
+# Triggered when a work item receives a new comment
+#
+# Behavior:
+# 1. Analyze the comment to understand intent
+# 2. Draft and post a reply comment
+# 3. DO NOT update any work item fields (state, assignment, priority, etc.)
+
+name: handle-work-item-comment
+description: |
+  Respond to work item comments by posting reply comments.
+  ONLY posts comments - never updates work item fields.
+
+context:
+  required:
+    - org           # e.g., "msazure"
+    - project       # e.g., "One"
+    - work_item_id  # Work item ID
+    - comment_author
+    - comment_text
+  optional:
+    - comment_id    # Specific comment ID if available
+
+steps:
+  - name: fetch-context
+    agent: azure-devops:ado-work-items
+    instruction: |
+      Fetch context for work item comment response:
+      
+      Org: {{org}}
+      Project: {{project}}
+      Work Item ID: {{work_item_id}}
+      
+      Get:
+      1. Work item title, type, and current state
+      2. Work item description
+      3. Recent comment history (last 5 comments for context)
+      4. Any linked PRs or related work items
+      
+      Return structured summary.
+
+  - name: analyze-intent
+    agent: azure-devops:ado-work-items
+    instruction: |
+      Analyze this work item comment:
+      
+      Comment by: {{comment_author}}
+      Comment text: {{comment_text}}
+      
+      Work Item Context:
+      {{steps.fetch-context.output}}
+      
+      ## Determine Intent
+      
+      Classify the comment as one of:
+      - **question**: Asking for information or clarification
+      - **request**: Asking for action to be taken
+      - **status-update**: Informing about progress
+      - **discussion**: General discussion point
+      - **mention-for-awareness**: FYI, no response needed
+      
+      Return:
+      - intent_type: [one of above]
+      - requires_response: true/false
+      - key_points: [list of main points to address]
+
+  - name: draft-and-post-reply
+    agent: azure-devops:ado-work-items
+    instruction: |
+      Based on the analysis:
+      {{steps.analyze-intent.output}}
+      
+      Original comment by {{comment_author}}:
+      {{comment_text}}
+      
+      ## Your Task
+      
+      If requires_response is true, draft and POST a reply comment.
+      
+      ### Reply Guidelines
+      
+      - Be concise and professional
+      - Address the specific points raised
+      - If it's a question: provide a clear answer or say what you need to find out
+      - If it's a request: acknowledge what you'll do (but don't do it here)
+      - If it's unclear: ask for clarification
+      
+      ### CRITICAL CONSTRAINTS
+      
+      - You MUST only add a comment
+      - DO NOT update the work item state
+      - DO NOT change assignment
+      - DO NOT modify priority, area path, iteration, or any other fields
+      - DO NOT add or remove tags
+      - ONLY post a comment reply
+      
+      Use `az boards work-item update` ONLY with the `--discussion` flag:
+      ```bash
+      az boards work-item update --id {{work_item_id}} \
+        --org "https://dev.azure.com/{{org}}" \
+        --discussion "<your reply text>"
+      ```
+      
+      Report what reply was posted.

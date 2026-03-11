@@ -1,0 +1,95 @@
+# Handle PR Comment Recipe
+# Triggered when a PR receives new review comments
+#
+# Behavior:
+# 1. Fetch the PR and comment details
+# 2. Analyze what the comment is asking for
+# 3. If code changes needed: make the changes and push
+# 4. Reply to the comment thread with what was done
+
+name: handle-pr-comment
+description: |
+  Analyze PR review comments and take appropriate action.
+  Makes code changes when requested, replies to threads.
+
+context:
+  required:
+    - org           # e.g., "msazure"
+    - project       # e.g., "One"
+    - repo          # e.g., "PriceDerivationEngine"
+    - pr_id         # PR number
+    - thread_id     # Comment thread ID
+    - comment_id    # Specific comment ID
+    - comment_author
+    - comment_text
+  optional:
+    - file_path     # File the comment is on (if inline comment)
+    - line_number   # Line number (if inline comment)
+
+steps:
+  - name: fetch-context
+    agent: azure-devops:ado-pr-manager
+    instruction: |
+      Fetch full context for PR comment response:
+      
+      Org: {{org}}
+      Project: {{project}}
+      Repo: {{repo}}
+      PR ID: {{pr_id}}
+      
+      Get:
+      1. PR title and description
+      2. The full comment thread (thread_id: {{thread_id}})
+      3. The specific file/line context if this is an inline comment
+         - File: {{file_path}}
+         - Line: {{line_number}}
+      4. Current PR status (draft, active, etc.)
+      
+      Return structured JSON with all context.
+
+  - name: analyze-and-act
+    agent: azure-devops:ado-pr-responder
+    instruction: |
+      Analyze this PR comment and take action:
+      
+      Comment by: {{comment_author}}
+      Comment text: {{comment_text}}
+      
+      PR Context:
+      {{steps.fetch-context.output}}
+      
+      ## Decision Framework
+      
+      1. **If comment requests code change:**
+         - Checkout the PR branch
+         - Make the requested change
+         - Commit with message referencing the comment
+         - Push the commit
+         - Reply to thread: "Done in commit [sha]. [brief description of change]"
+      
+      2. **If comment asks a question:**
+         - Analyze the code/context to find the answer
+         - Reply to thread with a clear answer
+      
+      3. **If comment is approval/positive feedback:**
+         - Reply with brief acknowledgment: "Thanks for the review!"
+      
+      4. **If comment is unclear:**
+         - Reply asking for clarification
+      
+      5. **If comment is a nit/suggestion (optional):**
+         - Reply: "Noted for future. [or] Applied in [commit]."
+      
+      ## Important
+      - Always reply to the comment thread
+      - If making code changes, ensure tests still pass before pushing
+      - Reference commit SHA in reply when changes are made
+
+  - name: verify-response
+    agent: azure-devops:ado-pr-manager
+    instruction: |
+      Verify the action was completed:
+      
+      1. If code was pushed: confirm the commit appears on the PR
+      2. Confirm the reply was posted to thread {{thread_id}}
+      3. Report final status
