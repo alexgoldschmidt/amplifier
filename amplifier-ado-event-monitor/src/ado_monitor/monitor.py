@@ -12,6 +12,7 @@ from pathlib import Path
 from .config import Config
 from .differ import IGNORE_AUTHORS, diff_snapshots
 from .dispatcher import Dispatcher
+from .event_logger import EventLogger
 from .models import Subscription
 from .poller import ADOClient, Poller
 from .sources import (
@@ -31,15 +32,18 @@ class Monitor:
         self,
         config: Config,
         state_store: StateStore,
+        event_logger: EventLogger | None = None,
     ) -> None:
         """Initialize the monitor.
 
         Args:
             config: Parsed configuration
             state_store: State persistence
+            event_logger: Optional event logger for JSONL output
         """
         self.config = config
         self.state_store = state_store
+        self.event_logger = event_logger or EventLogger()
 
         # Build subscription lookup
         self.subscriptions = {s.id: s for s in config.subscriptions}
@@ -170,16 +174,38 @@ class Monitor:
                 if result:
                     status = "done" if result.success else "failed"
                     self.state_store.mark_event_processed(event_id, status=status)
+
+                    # Log to JSONL file
+                    self.event_logger.log_event(
+                        event=event,
+                        subscription=subscription,
+                        dispatch_result={
+                            "agent": result.agent,
+                            "success": result.success,
+                            "error": result.error,
+                        },
+                    )
+
                     if result.success:
                         logger.info(f"Successfully dispatched to {result.agent}")
                     else:
                         logger.error(f"Dispatch failed: {result.error}")
                 else:
-                    # No matching action
+                    # No matching action - still log the event
                     self.state_store.mark_event_processed(event_id, status="skipped")
-            except Exception:
+                    self.event_logger.log_event(
+                        event=event,
+                        subscription=subscription,
+                        dispatch_result={"action": "skipped", "reason": "no matching action"},
+                    )
+            except Exception as e:
                 logger.exception(f"Failed to dispatch event {event_id}")
                 self.state_store.mark_event_processed(event_id, status="failed")
+                self.event_logger.log_event(
+                    event=event,
+                    subscription=subscription,
+                    dispatch_result={"action": "failed", "error": str(e)},
+                )
 
 
 async def run_monitor(
