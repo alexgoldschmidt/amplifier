@@ -34,8 +34,6 @@ includes:
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-swe-agents
   # Local worktree-based parallel development
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-worktrees
-  # Dev machine bundle for autonomous development infrastructure
-  - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
 
 context:
   include:
