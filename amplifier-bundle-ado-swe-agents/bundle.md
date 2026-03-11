@@ -14,6 +14,8 @@ bundle:
     - Assigned to: GitHub Copilot
     - Repository link (artifact link OR copilot:repo tag)
     - Optional agent tags for specialized workflows
+includes:
+  - bundle: git+https://github.com/microsoft/amplifier-foundation@main
 
 agents:
   include:
