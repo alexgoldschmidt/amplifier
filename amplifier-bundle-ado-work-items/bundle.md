@@ -21,6 +21,8 @@ context:
     - ado-work-items:context/ado-team-config-reference.md
     - ado-work-items:context/ado-work-item-templates.md
     - ado-work-items:context/ado-wiql-reference.md
+    - ado-work-items:context/work-stream-discovery.md
+    - ado-work-items:context/team-iteration-discovery.md
 
 tools:
   - module: tool-bash
@@ -58,3 +60,5 @@ extends:
 - `ado-bootstrap-protocol.md` — Dynamic process discovery
 - `ado-work-item-templates.md` — Per-type templates
 - `ado-team-config-reference.md` — Team customization
+- `work-stream-discovery.md` — Parallel work stream queries (SWE Agent vs Worktree)
+- `team-iteration-discovery.md` — Team and sprint context resolution

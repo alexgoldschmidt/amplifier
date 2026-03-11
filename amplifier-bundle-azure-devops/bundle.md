@@ -32,10 +32,10 @@ includes:
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-kql
   # SWE Agent task management (GitHub Copilot auto-PR creation)
   - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-swe-agents
+  # Local worktree-based parallel development
+  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-ado-worktrees
   # Dev machine bundle for autonomous development infrastructure
   - bundle: git+https://github.com/ramparte/amplifier-bundle-dev-machine@main
-  # Parallel worktrees for isolated feature development
-  - bundle: git+https://github.com/alexgoldschmidt/amplifier@master#subdirectory=amplifier-bundle-parallel-worktrees
 
 context:
   include:
@@ -62,7 +62,8 @@ azure-devops (full suite)
 ├── ado-scrum (standup & journal tracking)
 ├── ado-test (test execution & analysis)
 ├── ado-kql (KQL diagnostics)
-└── ado-swe-agents (GitHub Copilot SWE Agent tasks)
+├── ado-swe-agents (GitHub Copilot SWE Agent tasks)
+└── ado-worktrees (local parallel development)
 ```
 
 ## Quick Start
@@ -91,6 +92,7 @@ az devops project show
 | `ado-test-runner` | Local tests, pipeline results, failure linking |
 | `ado-kql-analyst` | KQL queries, query library, Geneva diagnostics |
 | `ado-swe-agent` | **REQUIRED** for creating PRs via GitHub Copilot SWE Agent |
+| `worktree-coordinator` | Local parallel development via git worktrees |
 
 ## Lighter Alternatives
 

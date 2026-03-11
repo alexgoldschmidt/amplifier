@@ -3,6 +3,72 @@
 GitHub Copilot's SWE Agent monitors Azure DevOps for specially-configured work items
 and automatically creates pull requests to implement them.
 
+## Execution Model
+
+SWE Agents execute on **remote GitHub infrastructure**, NOT on user machines.
+
+| Aspect | SWE Agent Reality |
+|--------|-------------------|
+| Execution | Remote cloud (GitHub) |
+| Git access | Via GitHub API only |
+| Local filesystem | None — no access |
+| User interaction | **PR comments only** |
+| Work item updates | Via ADO API (tags, state, PR linking) |
+
+### What SWE Agents CAN Do
+
+- Create pull requests in linked repositories
+- Respond to PR review comments
+- Update work item state and tags
+- Add comments to work items
+
+### What SWE Agents CANNOT Do
+
+- Access local git worktrees
+- Run local builds or tests (they run in PR checks)
+- Open files on user's machine
+- Execute bash commands locally
+- Push to arbitrary branches (only their PR branch)
+
+## Work Item Eligibility
+
+**SWE Agents can ONLY be assigned work items that are unstarted.**
+
+A work item is eligible for SWE Agent if:
+1. **No existing PR** — virgin work only
+2. **No `execution:worktree` tag** — not being worked locally
+3. **No `execution:manual` tag** — not being worked manually
+4. **Appropriately scoped** — single logical change
+
+If a work item already has a PR (even a draft) or is tagged as being worked elsewhere,
+it is **NOT eligible** for SWE Agent. Use worktree mode to continue work with existing PRs.
+
+## PR Comment Interaction
+
+**SWE Agents ONLY respond to comments where they are explicitly @mentioned.**
+
+### How to Address the SWE Agent
+
+In PR comments, use:
+```
+@GitHub Copilot <your request>
+```
+
+### Example
+
+```
+@GitHub Copilot Please also add unit tests for the error handling paths.
+```
+
+### Comments Without @ Mention
+
+If you leave a comment WITHOUT @mentioning the agent:
+- The agent will **NOT** see it
+- The agent will **NOT** respond
+- Your feedback will be **ignored**
+
+**Always @mention `@GitHub Copilot`** when you want it to take action.
+
 ## SWE Agent Task Requirements
 
 A work item triggers the SWE Agent when ALL of these conditions are met:
