@@ -5,15 +5,31 @@ Amplifier agents (preferably via recipes for resumability and audit trails).
 """
 
 import asyncio
+import json
 import logging
 import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from .models import Action, Event, Subscription
+from .models import Action, Event, EventType, Subscription
 from .state import StateStore
 
 logger = logging.getLogger(__name__)
+
+# Event type to recipe mapping
+# These are the recipes we created in amplifier-ado-event-monitor/recipes/
+EVENT_RECIPE_MAP: dict[EventType, str] = {
+    # PR events
+    EventType.PR_COMMENT_NEW: "handle-pr-comment",
+    EventType.PR_STATUS_CHANGED: "handle-pr-build-failure",
+    EventType.PR_VOTE_CHANGED: "handle-pr-vote-change",
+    # Work item events
+    EventType.WI_COMMENT_ADDED: "handle-work-item-comment",
+}
+
+# Base path for recipes (relative to this package)
+RECIPES_DIR = Path(__file__).parent.parent.parent / "recipes"
 
 
 @dataclass
@@ -61,6 +77,11 @@ class Dispatcher:
         Uses a per-subscription mutex to prevent concurrent dispatches
         on the same entity (prevents race conditions).
 
+        Dispatch priority:
+        1. Recipe from EVENT_RECIPE_MAP (preferred - built-in recipes)
+        2. Recipe from subscription action config
+        3. Direct agent invocation (fallback)
+
         Args:
             event: The event to dispatch
 
@@ -72,7 +93,21 @@ class Dispatcher:
             logger.warning(f"No subscription found for event: {event.subscription_id}")
             return None
 
-        # Find matching action
+        # Check if we have a built-in recipe for this event type
+        recipe_name = EVENT_RECIPE_MAP.get(event.event_type)
+        if recipe_name:
+            # Use built-in recipe
+            recipe_path = RECIPES_DIR / f"{recipe_name}.yaml"
+            if recipe_path.exists():
+                lock = self._get_lock(event.subscription_id)
+                async with lock:
+                    context = self._build_recipe_context(event, subscription)
+                    logger.info(f"Dispatching {event.event_type.value} via recipe {recipe_name}")
+                    return await self._invoke_recipe(str(recipe_path), context)
+            else:
+                logger.warning(f"Recipe not found: {recipe_path}")
+
+        # Fall back to subscription-configured action
         action = self._find_matching_action(event, subscription)
         if not action:
             logger.debug(f"No action matches event type: {event.event_type.value}")
@@ -156,13 +191,71 @@ class Dispatcher:
             "behavior": action.behavior,
         }
 
+    def _build_recipe_context(self, event: Event, subscription: Subscription) -> dict[str, Any]:
+        """Build context dictionary for recipe invocation.
+
+        Extracts relevant fields from event payload for recipe context variables.
+        """
+        context: dict[str, Any] = {
+            "org": subscription.org,
+            "project": subscription.project,
+            "repo": subscription.repo,
+            "pr_id": subscription.pr_id,
+            "work_item_id": subscription.work_item_id,
+        }
+
+        payload = event.payload or {}
+
+        # PR comment context
+        if event.event_type == EventType.PR_COMMENT_NEW:
+            context.update(
+                {
+                    "thread_id": payload.get("thread_id"),
+                    "comment_id": payload.get("comment_id"),
+                    "comment_author": payload.get("author") or event.author,
+                    "comment_text": payload.get("content", ""),
+                    "file_path": payload.get("file_path"),
+                    "line_number": payload.get("line_number"),
+                }
+            )
+
+        # PR vote change context
+        elif event.event_type == EventType.PR_VOTE_CHANGED:
+            context.update(
+                {
+                    "voter_name": payload.get("reviewer") or event.author,
+                    "vote_type": payload.get("vote"),
+                    "vote_comment": payload.get("comment"),
+                }
+            )
+
+        # PR status/build failure context
+        elif event.event_type == EventType.PR_STATUS_CHANGED:
+            context.update(
+                {
+                    "build_id": payload.get("build_id"),
+                    "failure_type": payload.get("status_type", "build"),
+                    "build_url": payload.get("build_url"),
+                }
+            )
+
+        # Work item comment context
+        elif event.event_type == EventType.WI_COMMENT_ADDED:
+            context.update(
+                {
+                    "comment_author": payload.get("author") or event.author,
+                    "comment_text": payload.get("content", ""),
+                    "comment_id": payload.get("comment_id"),
+                }
+            )
+
+        return context
+
     async def _invoke_recipe(self, recipe_path: str, context: dict[str, Any]) -> DispatchResult:
         """Invoke an Amplifier recipe.
 
         Recipes provide resumability, approval gates, and audit trails.
         """
-        import json
-
         cmd = [
             self.amplifier_cmd,
             "tool",
@@ -197,8 +290,6 @@ class Dispatcher:
         self, agent: str, behavior: str | None, context: dict[str, Any]
     ) -> DispatchResult:
         """Invoke an Amplifier agent directly (fallback when no recipe)."""
-        import json
-
         # Build instruction based on behavior
         instruction = self._build_instruction(behavior, context)
 
